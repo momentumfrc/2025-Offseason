@@ -14,13 +14,63 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * project.
  */
 public class Robot extends TimedRobot {
+  private MecanumDrive m_robotDrive;
+  private XboxController controller = new XboxController(0);
 
-  /**
-   * This function is run when the robot is first started up and should be used for any
-   * initialization code.
-   */
+  private CANVenom frontLeft = new CANVenom(3);
+  private CANVenom rearLeft = new CANVenom(4);
+  private CANVenom frontRight = new CANVenom(5);
+  private CANVenom rearRight = new CANVenom(1);
+  private double MAX_SPEED = 1000;
+  private double driveKP = 0.15;
+
+  private ShuffleboardTab drivePID = Shuffleboard.getTab("Drive PID");
+  private GenericEntry kP = drivePID.add("kP", driveKP).getEntry();
+
+  private void setFrontLeftWithPID(double value) {
+    double speed = value * MAX_SPEED;
+    frontLeft.setCommand(ControlMode.SpeedControl, speed);
+  }
+
+  private void setBackLeftWithPID(double value) {
+    double speed = value * MAX_SPEED;
+    rearLeft.setCommand(ControlMode.SpeedControl, speed);
+  }
+
+  private void setFrontRightWithPID(double value) {
+    double speed = value * MAX_SPEED;
+    frontRight.setCommand(ControlMode.SpeedControl, speed);
+    SmartDashboard.putNumber("Speed Setpoint", speed);
+  }
+
+  private void setBackRightWithPID(double value) {
+    double speed = value * MAX_SPEED;
+    rearRight.setCommand(ControlMode.SpeedControl, speed);
+  }
+
+  private void setDriveKP() {
+    double smartdashboardKp = kP.getDouble(driveKP);
+    if (driveKP!=smartdashboardKp){
+      driveKP = smartdashboardKp;
+      frontLeft.setKP(driveKP);
+      frontRight.setKP(driveKP);
+      rearLeft.setKP(driveKP);
+      rearRight.setKP(driveKP);
+    }
+  }
+
   @Override
   public void robotInit() {
+    m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
+    m_chooser.addOption("My Auto", kCustomAuto);
+    SmartDashboard.putData("Auto choices", m_chooser);
+
+    frontRight.setInverted(true);
+    rearRight.setInverted(true);
+
+    setDriveKP();
+
+    m_robotDrive = new MecanumDrive(this::setFrontLeftWithPID, this::setBackLeftWithPID, this::setFrontRightWithPID, this::setBackRightWithPID);
   }
 
   /**
@@ -58,7 +108,13 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    setDriveKP();
+
+    m_robotDrive.driveCartesian(-controller.getLeftY(), -controller.getLeftX(), -controller.getRightX());
+
+    SmartDashboard.putNumber("Front Right Speed", frontRight.getSpeed());
+  }
 
   /** This function is called once when the robot is disabled. */
   @Override
