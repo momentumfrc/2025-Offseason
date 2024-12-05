@@ -137,7 +137,7 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     setDriveKP();
 
-    m_robotDrive.driveCartesian(-controller.getLeftY(), -controller.getLeftX(), -controller.getRightX());
+    m_robotDrive.driveCartesian(-controller.getLeftY(), controller.getLeftX(), controller.getRightX());
 
     SmartDashboard.putNumber("Front Right Speed", frontRight.getSpeed());
     SmartDashboard.putNumber("Front Left Speed", frontLeft.getSpeed());
