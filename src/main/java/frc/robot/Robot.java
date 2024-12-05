@@ -22,8 +22,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * project.
  */
 public class Robot extends TimedRobot {
-  private MecanumDrive m_robotDrive;
-  private XboxController controller = new XboxController(0);
+  private MecanumDrive robotDrive;
+  private final XboxController controller = new XboxController(0);
 
   private CANVenom frontLeft = new CANVenom(3);
   private CANVenom rearLeft = new CANVenom(4);
@@ -90,7 +90,7 @@ public class Robot extends TimedRobot {
     rearLeft.setPID(driveKP,0,0,driveKFF,0);
     rearRight.setPID(driveKP,0,0,driveKFF,0);
 
-    m_robotDrive = new MecanumDrive(this::setFrontLeftWithPID, this::setBackLeftWithPID, this::setFrontRightWithPID, this::setBackRightWithPID);
+    robotDrive = new MecanumDrive(this::setFrontLeftWithPID, this::setBackLeftWithPID, this::setFrontRightWithPID, this::setBackRightWithPID);
   }
 
   /**
@@ -131,7 +131,7 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    m_robotDrive.driveCartesian(-controller.getLeftY(), controller.getLeftX(), controller.getRightX());
+    robotDrive.driveCartesian(-controller.getLeftY(), controller.getLeftX(), controller.getRightX());
 
     SmartDashboard.putNumber("Front Right Speed", frontRight.getSpeed());
     SmartDashboard.putNumber("Front Left Speed", frontLeft.getSpeed());
