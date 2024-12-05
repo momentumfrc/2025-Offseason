@@ -7,6 +7,7 @@ package frc.robot;
 import com.playingwithfusion.CANVenom;
 import com.playingwithfusion.CANVenom.ControlMode;
 
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
@@ -25,10 +26,10 @@ public class Robot extends TimedRobot {
   private MecanumDrive robotDrive;
   private final XboxController controller = new XboxController(0);
 
-  private CANVenom frontLeft = new CANVenom(3);
-  private CANVenom rearLeft = new CANVenom(4);
-  private CANVenom frontRight = new CANVenom(1);
-  private CANVenom rearRight = new CANVenom(5);
+  private final CANVenom frontLeft = new CANVenom(3);
+  private final CANVenom rearLeft = new CANVenom(4);
+  private final CANVenom frontRight = new CANVenom(1);
+  private final CANVenom rearRight = new CANVenom(5);
   private double MAX_SPEED = 1000;
   private double driveKP = 0.6;
   private double driveKFF = 0.4;
@@ -36,6 +37,10 @@ public class Robot extends TimedRobot {
   private ShuffleboardTab drivePID = Shuffleboard.getTab("Drive PID");
   private GenericEntry kP = drivePID.add("kP", driveKP).getEntry();
   private GenericEntry kFF = drivePID.add("kFF", driveKFF).getEntry();
+
+  private final TrapezoidProfile driveProfile = new TrapezoidProfile(new TrapezoidProfile.Constraints(5, 10));
+  private TrapezoidProfile.State driveGoal = new TrapezoidProfile.State();
+  private TrapezoidProfile.State driveSetpoint = new TrapezoidProfile.State();
 
   private void setFrontLeftWithPID(double value) {
     double speed = value * MAX_SPEED;
@@ -137,6 +142,8 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Front Left Speed", frontLeft.getSpeed());
     SmartDashboard.putNumber("Back Right Speed", rearRight.getSpeed());
     SmartDashboard.putNumber("Back Left Speed", rearLeft.getSpeed());
+
+    SmartDashboard.putNumber("Front Right Position", frontRight.getPosition());
   }
 
   /** This function is called once when the robot is disabled. */
