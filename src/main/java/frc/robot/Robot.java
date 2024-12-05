@@ -4,7 +4,15 @@
 
 package frc.robot;
 
+import com.playingwithfusion.CANVenom;
+import com.playingwithfusion.CANVenom.ControlMode;
+
+import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.drive.MecanumDrive;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
@@ -22,40 +30,53 @@ public class Robot extends TimedRobot {
   private CANVenom frontRight = new CANVenom(5);
   private CANVenom rearRight = new CANVenom(1);
   private double MAX_SPEED = 1000;
-  private double driveKP = 0.15;
+  private double driveKP = 0.2;
+  private double driveKFF = 0.4;
 
   private ShuffleboardTab drivePID = Shuffleboard.getTab("Drive PID");
   private GenericEntry kP = drivePID.add("kP", driveKP).getEntry();
+  private GenericEntry kFF = drivePID.add("kFF", driveKFF).getEntry();
 
   private void setFrontLeftWithPID(double value) {
     double speed = value * MAX_SPEED;
     frontLeft.setCommand(ControlMode.SpeedControl, speed);
+    SmartDashboard.putNumber("Front Left Speed Setpoint", speed);
   }
 
   private void setBackLeftWithPID(double value) {
     double speed = value * MAX_SPEED;
     rearLeft.setCommand(ControlMode.SpeedControl, speed);
+    SmartDashboard.putNumber("Back Left Speed Setpoint", speed);
   }
 
   private void setFrontRightWithPID(double value) {
     double speed = value * MAX_SPEED;
     frontRight.setCommand(ControlMode.SpeedControl, speed);
-    SmartDashboard.putNumber("Speed Setpoint", speed);
+    SmartDashboard.putNumber("Front Right Speed Setpoint", speed);
   }
 
   private void setBackRightWithPID(double value) {
     double speed = value * MAX_SPEED;
     rearRight.setCommand(ControlMode.SpeedControl, speed);
+    SmartDashboard.putNumber("Back Right Speed Setpoint", speed);
   }
 
-  private void setDriveKP() {
+  private void setDriveConstants() {
     double smartdashboardKp = kP.getDouble(driveKP);
+    double smartdashboardKFF = kFF.getDouble(driveKFF);
     if (driveKP!=smartdashboardKp){
       driveKP = smartdashboardKp;
       frontLeft.setKP(driveKP);
       frontRight.setKP(driveKP);
       rearLeft.setKP(driveKP);
       rearRight.setKP(driveKP);
+    }
+    if (driveKFF!=smartdashboardKFF){
+      driveKFF = smartdashboardKFF;
+      frontLeft.setKF(driveKFF);
+      frontRight.setKF(driveKFF);
+      rearLeft.setKF(driveKFF);
+      rearRight.setKF(driveKFF);
     }
   }
 
@@ -68,7 +89,10 @@ public class Robot extends TimedRobot {
     frontRight.setInverted(true);
     rearRight.setInverted(true);
 
-    setDriveKP();
+    frontLeft.setPID(driveKP,0,0,driveKFF,0);
+    frontRight.setPID(driveKP,0,0,driveKFF,0);
+    rearLeft.setPID(driveKP,0,0,driveKFF,0);
+    rearRight.setPID(driveKP,0,0,driveKFF,0);
 
     m_robotDrive = new MecanumDrive(this::setFrontLeftWithPID, this::setBackLeftWithPID, this::setFrontRightWithPID, this::setBackRightWithPID);
   }
@@ -81,7 +105,9 @@ public class Robot extends TimedRobot {
    * SmartDashboard integrated updating.
    */
   @Override
-  public void robotPeriodic() {}
+  public void robotPeriodic() {
+    setDriveConstants();
+  }
 
   /**
    * This autonomous (along with the chooser code above) shows how to select between different
@@ -114,6 +140,9 @@ public class Robot extends TimedRobot {
     m_robotDrive.driveCartesian(-controller.getLeftY(), -controller.getLeftX(), -controller.getRightX());
 
     SmartDashboard.putNumber("Front Right Speed", frontRight.getSpeed());
+    SmartDashboard.putNumber("Front Left Speed", frontLeft.getSpeed());
+    SmartDashboard.putNumber("Back Right Speed", rearRight.getSpeed());
+    SmartDashboard.putNumber("Back Left Speed", rearLeft.getSpeed());
   }
 
   /** This function is called once when the robot is disabled. */
