@@ -30,7 +30,7 @@ public class Robot extends TimedRobot {
   private CANVenom frontRight = new CANVenom(1);
   private CANVenom rearRight = new CANVenom(5);
   private double MAX_SPEED = 1000;
-  private double driveKP = 0.2;
+  private double driveKP = 0.6;
   private double driveKFF = 0.4;
 
   private ShuffleboardTab drivePID = Shuffleboard.getTab("Drive PID");
