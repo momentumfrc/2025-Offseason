@@ -131,8 +131,6 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    setDriveKP();
-
     m_robotDrive.driveCartesian(-controller.getLeftY(), controller.getLeftX(), controller.getRightX());
 
     SmartDashboard.putNumber("Front Right Speed", frontRight.getSpeed());
